@@ -12,15 +12,11 @@ run yum install -y epel-release
 run yum install -y \
     curl \
     gcc g++ \
-    mesa-libGL-devel \
     mesa-libOSMesa-devel \
     wget \
     git \
     sudo \
     ncurses-devel \
-    xorg-x11-server-Xorg xorg-x11-xauth xorg-x11-apps \
-    libX11-devel \
-    libXt-devel \
     freeglut-devel \
     vim \
     automake \
@@ -31,9 +27,13 @@ run yum install -y \
     tbb-devel \
     ninja-build \
     openssh-server \ 
-    openssh-clients \ 
-    rsh \ 
-    rsh-server
+    openssh-clients  
+#    libX11-devel \
+#    libXt-devel \
+#    rsh \ 
+#    rsh-server
+#    mesa-libGL-devel \
+#    xorg-x11-server-Xorg xorg-x11-xauth xorg-x11-apps \
 #run yum autoremove -y \
 # && yum clean all
 run yum autoremove -y
@@ -46,25 +46,10 @@ run mkdir /paraview \
  && mkdir /paraview/build \
  && mkdir /paraview/src \
  && mkdir /paraview/install 
-# && mkdir /sensei \
-# && mkdir /sensei/build \
-# && mkdir /sensei/src \
-# && mkdir /sensei/install
 
 ###############
 # CMake
 ###############
-
-#workdir /paraview/src
-#run wget https://cmake.org/files/v3.17/cmake-3.17.3.tar.gz \
-# && tar xzf cmake-3.17.3.tar.gz \
-# && rm cmake-3.17.3.tar.gz
-
-#run mkdir /paraview/build/CMake 
-#workdir /paraview/build/CMake
-#run /paraview/src/cmake-3.17.3/bootstrap --prefix=/paraview/install/CMake
-#run make -j8
-#run make install
 
 workdir /paraview/install
 run wget https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4-Linux-x86_64.tar.gz \
@@ -131,7 +116,6 @@ run mkdir /paraview/build/paraview \
     -D PARAVIEW_BUILD_LEGACY_SILENT=ON \
     -D PARAVIEW_USE_MPI=ON \
     -D PARAVIEW_USE_PYTHON=ON \
-    -D USE_CATALYST=ON \
     -D PARAVIEW_USE_QTHELP=OFF \
     -D PARAVIEW_ENABLE_WEB=OFF \
     -D PARAVIEW_ENABLE_RAYTRACING=ON \
@@ -140,7 +124,6 @@ run mkdir /paraview/build/paraview \
     -D VTK_USE_X=OFF \
     -D CMAKE_SKIP_INSTALL_RPATH=TRUE \
     -D PARAVIEW_BUILD_SHARED_LIBS=ON \
-    -D VTK_USE_PATH=OFF \
     -D PARAVIEW_RELOCATABLE_INSTALL=OFF \
     -D VTK_OPENGL_HAS_OSMESA=ON \
     -D OSMESA_INCLUDE_DIR="/usr/include/GL/" \
@@ -150,23 +133,18 @@ RUN cd /paraview/build/paraview \
  && ninja \
  && ninja install
 
+env LD_LIBRARY_PATH=/paraview/install/paraview/lib64/:/paraview/install/ospray/lib:/paraview/install/paraview/lib64/python3.6/site-packages/vtkmodules:$LD_LIBRARY_PATH
+env PATH=/paraview/install/paraview/bin:$PATH
 
+# delete sources
+run rm -rf /paraview/src
+
+#delete build files
+run rm -rf /paraview/build
 
 
 # remove mpich to avoid any possible conflict with system libraries
-run sudo rm -rf /paraview/install/mpich
-
-# point to correct directory
-
-#env LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/paraview/lib64/"
-###############################################################################
-
-
-
-#run wget "http://springdale.princeton.edu/data/springdale/7/x86_64/os/Computational/libGLEW2-2.0.0-4.sdl7.x86_64.rpm" \
-# && rpm -ivh libGLEW2-2.0.0-4.sdl7.x86_64.rpm
-
-#run yum install libGLEW2 -y
+#run sudo rm -rf /paraview/install/mpich
 
 #ENV PYTHONPATH=/usr/local/paraview/lib64/python3.6/site-packages:/usr/local/paraview/lib64/python3.6/site-packages/vtkmodules:/usr/local/paraview/lib64/python3.6/site-packages/paraview/modules
 
