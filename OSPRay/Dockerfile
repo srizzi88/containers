@@ -16,26 +16,14 @@ run yum install -y \
     wget \
     git \
     sudo \
-    ncurses-devel \
-    freeglut-devel \
     vim \
     automake \
     openssl-devel \
-    epel-release \
     python3-devel \
     python3-numpy \
     tbb-devel \
-    ninja-build \
-    openssh-server \ 
     openssh-clients  
-#    libX11-devel \
-#    libXt-devel \
-#    rsh \ 
-#    rsh-server
-#    mesa-libGL-devel \
-#    xorg-x11-server-Xorg xorg-x11-xauth xorg-x11-apps \
-#run yum autoremove -y \
-# && yum clean all
+#    freeglut-devel \
 run yum autoremove -y
 
 ############################
@@ -58,7 +46,6 @@ run wget https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4
  && mv cmake-3.18.4-Linux-x86_64 cmake
 
 # add cmake binaries to the path
-#env PATH="/paraview/install/CMake/bin:$PATH"
 env PATH="/paraview/install/cmake/bin:$PATH"
 
 ##############
@@ -107,7 +94,7 @@ run git checkout v5.8.0 \
 env ospray_DIR="/paraview/install/ospray"
 run mkdir /paraview/build/paraview \
  && cd /paraview/build/paraview \
- && cmake -G Ninja \
+ && cmake \
     -D CMAKE_INSTALL_PREFIX=/paraview/install/paraview \
     -D CMAKE_BUILD_TYPE=Release \
     -D PARAVIEW_BUILD_SHARED_LIBS=ON \
@@ -130,8 +117,8 @@ run mkdir /paraview/build/paraview \
     -D OSMESA_LIBRARY="/usr/lib64/libOSMesa.so" \
     /paraview/src/ParaView
 RUN cd /paraview/build/paraview \
- && ninja \
- && ninja install
+ && make -j8 \
+ && make install
 
 env LD_LIBRARY_PATH=/paraview/install/paraview/lib64/:/paraview/install/ospray/lib:/paraview/install/paraview/lib64/python3.6/site-packages/vtkmodules:$LD_LIBRARY_PATH
 env PATH=/paraview/install/paraview/bin:$PATH
@@ -141,13 +128,4 @@ run rm -rf /paraview/src
 
 #delete build files
 run rm -rf /paraview/build
-
-
-# remove mpich to avoid any possible conflict with system libraries
-#run sudo rm -rf /paraview/install/mpich
-
-#ENV PYTHONPATH=/usr/local/paraview/lib64/python3.6/site-packages:/usr/local/paraview/lib64/python3.6/site-packages/vtkmodules:/usr/local/paraview/lib64/python3.6/site-packages/paraview/modules
-
-# Add copied libraries and ParaView's python modules to the environment library path
-#ENV LD_LIBRARY_PATH="/usr/local/lib64:/ospray/lib:/usr/local/paraview/lib64/python3.6/site-packages/vtkmodules:/mdl/linux-x86-64/lib:/optix/lib64:/index/lib:$LD_LIBRARY_PATH"
 
