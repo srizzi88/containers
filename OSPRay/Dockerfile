@@ -12,6 +12,7 @@ run yum install -y epel-release
 run yum install -y \
     curl \
     gcc g++ \
+    mesa-libGL-devel \
     mesa-libOSMesa-devel \
     wget \
     git \
@@ -23,7 +24,6 @@ run yum install -y \
     python3-numpy \
     tbb-devel \
     openssh-clients  
-#    freeglut-devel \
 run yum autoremove -y
 
 ############################
@@ -115,6 +115,7 @@ run mkdir /paraview/build/paraview \
     -D VTK_OPENGL_HAS_OSMESA=ON \
     -D OSMESA_INCLUDE_DIR="/usr/include/GL/" \
     -D OSMESA_LIBRARY="/usr/lib64/libOSMesa.so" \
+    -D PARAVIEW_BUILD_MESA_LAUNCHER=ON \
     /paraview/src/ParaView
 RUN cd /paraview/build/paraview \
  && make -j8 \
