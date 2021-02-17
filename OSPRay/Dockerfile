@@ -44,6 +44,10 @@ run wget https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4
 # add cmake binaries to the path
 env PATH="/paraview/install/cmake/bin:$PATH"
 
+# gcc 4.8.5 in Centos 7 is too old
+# and causes problems
+# We build our own GCC 9.2.0
+
 ###############
 # GCC 9.2.0
 # from https://gist.github.com/nchaigne/ad06bc867f911a3c0d32939f1e930a11
@@ -63,9 +67,31 @@ run export GCC_VERSION=9.2.0 \
  && make -j 8 \
  && make install
 
- # add to local environment
- env PATH="/paraview/install/gcc/bin:$PATH"
- env LD_LIBRARY_PATH="/paraview/install/gcc/lib64:$LD_LIBRARY_PATH"
+# add to local environment
+env PATH="/paraview/install/gcc/bin:$PATH"
+env LD_LIBRARY_PATH="/paraview/install/gcc/lib64:$LD_LIBRARY_PATH"
+
+# remove previous versions of gcc because
+# they create conflicts with some paraview
+# dependencies
+
+run yum remove -y gcc gcc-c++
+
+# but now libtool and libtoolize are also
+# removed, so we need to build our own
+
+workdir /paraview/src
+run wget https://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz \
+ && tar xvf libtool-2.4.6.tar.gz \
+ && rm libtool-2.4.6.tar.gz
+run mkdir /paraview/build/libtool
+workdir /paraview/build/libtool
+run /paraview/src/libtool-2.4.6/configure --prefix=/paraview/install/libtool
+run make -j8
+run make install
+
+env PATH="/paraview/install/libtool/bin:$PATH"
+env LD_LIBRARY_PATH="/paraview/install/libtool/lib:$LD_LIBRARY_PATH"
 
 ##############
 # Mpich 3.2.1
@@ -83,7 +109,7 @@ workdir /paraview/build/mpich
 # this allows us to override the MPI libraries to use those
 # found via LD_LIBRARY_PATH
 
-run /paraview/src/mpich-3.2.1/configure --prefix=/paraview/install/mpich --disable-wrapper-rpath
+run /paraview/src/mpich-3.2.1/configure --prefix=/paraview/install/mpich --disable-wrapper-rpath --disable-fortran
 run make -j8 \
  && make install
 
@@ -91,30 +117,9 @@ run make -j8 \
 env PATH="/paraview/install/mpich/bin:$PATH"
 env LD_LIBRARY_PATH="/paraview/install/mpich/lib:$LD_LIBRARY_PATH"
 
-
-###
+######################
 # ParaView superbuild
-###
-
-run yum remove -y gcc gcc-c++
-
-# libtool
-workdir /paraview/src
-run wget https://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz \
- && tar xvf libtool-2.4.6.tar.gz \
- && rm libtool-2.4.6.tar.gz
-run mkdir /paraview/build/libtool
-workdir /paraview/build/libtool
-run /paraview/src/libtool-2.4.6/configure --prefix=/paraview/install/libtool
-run make -j8
-run make install
-
-env PATH="/paraview/install/libtool/bin:$PATH"
-env LD_LIBRARY_PATH="/paraview/install/libtool/lib:$LD_LIBRARY_PATH"
-
-
-
-
+######################
 
 run cd /paraview/src \
  && git clone --recursive https://gitlab.kitware.com/paraview/paraview-superbuild.git 
@@ -174,9 +179,9 @@ run make install
 #env LD_LIBRARY_PATH=/paraview/install/paraview/lib64/:/paraview/install/ospray/lib:/paraview/install/paraview/lib64/python3.6/site-packages/vtkmodules:$LD_LIBRARY_PATH
 #env PATH=/paraview/install/paraview/bin:$PATH
 
-# delete sources
-#run rm -rf /paraview/src
+# delete sources to save space in the image
+run rm -rf /paraview/src
 
-#delete build files
-#run rm -rf /paraview/build
+#delete build files to save space
+run rm -rf /paraview/build
 
