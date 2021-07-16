@@ -227,8 +227,8 @@ run sed -i 's/^CMAKE_CXX_FLAGS:.*/& -msse3/' superbuild/openimagedenoise/build/C
 run make sb-openimagedenoise
 #run fdsa
 
-run cat Makefile
-run dfsa
+#run cat Makefile
+#run dfsa
 
 run make -j8
 run make install
