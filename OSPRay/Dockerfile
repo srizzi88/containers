@@ -138,7 +138,7 @@ env LD_LIBRARY_PATH="/pvbuild/install/mpich/lib:$LD_LIBRARY_PATH"
 ######################
 
 run cd /pvbuild/src \
- && git clone --recursive https://gitlab.kitware.com/paraview/paraview-superbuild.git 
+ && git clone --recursive https://gitlab.kitware.com/paraview/paraview-superbuild.git && cd paraview-superbuild && git checkout v5.9.1 && git submodule update
 
 workdir /pvbuild/src
 run cmake -B /pvbuild/build/paraview -S /pvbuild/src/paraview-superbuild \
@@ -148,7 +148,7 @@ run cmake -B /pvbuild/build/paraview -S /pvbuild/src/paraview-superbuild \
   -DCMAKE_C_COMPILER="/pvbuild/install/gcc/bin/gcc" \
   -DENABLE_cxx11=ON \
   -Dparaview_SOURCE_SELECTION:STRING=git \
-  -Dparaview_GIT_TAG="v5.9.0" \
+  -Dparaview_GIT_TAG="v5.9.1" \
   -DENABLE_zfp:BOOL=OFF \
   -DCMAKE_BUILD_TYPE:STRING=Release \
   -DENABLE_netcdf:BOOL=OFF \
